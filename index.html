@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nível Bronze - Água</title>
+
+<style>
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#e6e6e6;
+}
+
+/* HEADER */
+header{
+  background:#bcd0e5;
+  padding:15px;
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  color:#1b6fdc;
+  position:relative;
+}
+
+/* CASA IMAGEM */
+.casa-topo{
+  position:absolute;
+  right:20px;
+  top:10px;
+  width:40px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.casa-topo:hover{
+  transform:scale(1.1);
+}
+
+/* NÍVEL */
+.progresso{
+  text-align:center;
+  margin:20px 0;
+}
+
+.nivel{
+  background:#1b6fdc;
+  color:white;
+  padding:6px 18px;
+  border-radius:20px;
+  font-weight:bold;
+}
+
+/* CARD */
+.card{
+  width:95%;
+  max-width:480px;
+  margin:auto;
+  background:#cfe0f2;
+  padding:30px;
+  border-left:6px solid #1b6fdc;
+  border-radius:12px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* PERGUNTA */
+.pergunta{
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:20px;
+}
+
+/* OPÇÕES */
+.opcao{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+  font-size:16px;
+}
+
+.opcao input{
+  width:18px;
+  height:18px;
+  cursor:pointer;
+}
+
+/* BOTÕES */
+button{
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  background:#1b6fdc;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover{
+  background:#1558b0;
+}
+
+.secundario{
+  background:#6c757d;
+}
+
+.secundario:hover{
+  background:#565e64;
+}
+
+/* FEEDBACK */
+#feedback{
+  margin-top:10px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.correto{color:green;}
+.errado{color:red;}
+
+/* RESULTADO */
+.resultado{
+  text-align:center;
+}
+
+.estrelas{
+  font-size:35px;
+  color:gold;
+  margin:10px 0;
+  animation:brilhar 1s ease-in-out infinite alternate;
+}
+
+@keyframes brilhar{
+  from{transform:scale(1);}
+  to{transform:scale(1.1);}
+}
+
+/* VOLTAR FINAL */
+.voltar-final{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  font-size:18px;
+  cursor:pointer;
+  font-weight:bold;
+  color:#1b6fdc;
+}
+
+/* VOLTAR DURANTE */
+.rodape{
+  position:fixed;
+  bottom:15px;
+  left:15px;
+}
+
+.rodape button{
+  width:auto;
+  padding:8px 14px;
+  font-size:14px;
+}
+
+</style>
+</head>
+<body>
+
+<header>
+Desafios - Nível Bronze
+<img src="casa.png" class="casa-topo" onclick="irInicio()">
+</header>
+
+<div class="progresso">
+  <span class="nivel" id="nivelTexto">Nível 1/1</span>
+</div>
+
+<div class="card" id="card"></div>
+
+<div class="rodape" id="voltarRodape">
+  <button onclick="voltarConfirmar()">← Voltar</button>
+</div>
+
+<div class="voltar-final" id="voltarFinal" style="display:none;" onclick="voltarDesafios()">↩ Voltar</div>
+
+<script>
+
+/* QUESTÕES */
+
+var perguntas = [
+{texto:"O que é a água?", opcoes:["Um recurso natural essencial para a vida","Um tipo de alimento sólido","Um mineral raro"], correta:0},
+{texto:"A água tem:", opcoes:["Cor azul forte","Cor, cheiro e sabor","Não tem cor, cheiro nem sabor"], correta:2},
+{texto:"Em que estado está a água que bebemos?", opcoes:["Sólido","Líquido","Gasoso"], correta:1},
+{texto:"O gelo é água em estado:", opcoes:["Gasoso","Líquido","Sólido"], correta:2},
+{texto:"O vapor é água em estado:", opcoes:["Gasoso","Sólido","Líquido"], correta:0},
+{texto:"Uma das importâncias da água é:", opcoes:["Fazer pedras crescerem","Beber e preparar alimentos","Produzir fogo"], correta:1},
+{texto:"A falta de água limpa pode causar:", opcoes:["Força física","Doenças como diarreia","Crescimento rápido"], correta:1},
+{texto:"A cólera pode ser causada por:", opcoes:["Água contaminada","Água limpa","Água fervida"], correta:0},
+{texto:"Uma fonte de água usada pelas comunidades é:", opcoes:["Computador","Poço","Televisão"], correta:1},
+{texto:"Para conservar a água devemos:", opcoes:["Deixar a torneira aberta","Fechar a torneira quando não estiver usando","Desperdiçar água no banho"], correta:1},
+{texto:"Para economizar água é melhor:", opcoes:["Usar baldes em vez de mangueiras","Usar mangueira sempre","Lavar o quintal todos os dias"], correta:0},
+{texto:"A água é responsabilidade:", opcoes:["Apenas do governo","De uma única pessoa","De toda a comunidade"], correta:2}
+];
+
+var indice = 0;
+var acertos = 0;
+var card = document.getElementById("card");
+
+/* MOSTRAR PERGUNTA */
+function mostrarPergunta(){
+  document.getElementById("nivelTexto").innerText = "Nível 1/" + (indice+1);
+  var p = perguntas[indice];
+  card.innerHTML = `
+    <div class="pergunta">${p.texto}</div>
+    <form>
+    ${p.opcoes.map((opcao,i)=>`
+      <label class="opcao">
+        <span>${opcao}</span>
+        <input type="radio" name="resposta" value="${i}">
+      </label>
+    `).join("")}
+    </form>
+    <button onclick="enviar()">Enviar a resposta</button>
+    <div id="feedback"></div>
+  `;
+}
+
+mostrarPergunta();
+
+/* ENVIAR */
+function enviar(){
+  var selecionado = document.querySelector('input[name="resposta"]:checked');
+  if(!selecionado){
+    alert("Selecione uma resposta!");
+    return;
+  }
+
+  if(parseInt(selecionado.value) === perguntas[indice].correta){
+    acertos++;
+    document.getElementById("feedback").innerHTML = "<span class='correto'>✔ Resposta correta!</span>";
+  }else{
+    document.getElementById("feedback").innerHTML = "<span class='errado'>✖ Resposta errada!</span>";
+  }
+
+  setTimeout(function(){
+    indice++;
+    if(indice < perguntas.length){
+      mostrarPergunta();
+    }else{
+      finalizar();
+    }
+  },1000);
+}
+
+/* FINAL */
+function finalizar(){
+  document.getElementById("voltarRodape").style.display="none";
+  document.getElementById("voltarFinal").style.display="block";
+  document.getElementById("nivelTexto").style.display="none";
+
+  var estrelas="";
+  var botoes="";
+
+  if(acertos===12) estrelas="⭐⭐⭐";
+  else if(acertos>=7) estrelas="⭐⭐";
+  else if(acertos>=1) estrelas="⭐";
+
+  if(acertos===0){
+    botoes=`<button onclick="location.reload()">Tentar novamente</button>`;
+  } else if(acertos >= 1 && acertos <= 6){ // de 1 a 3 estrelas
+    localStorage.setItem("bronzePontuacao",acertos);
+    botoes=`
+      <button onclick="irModulo2()">Ir para o Módulo 2</button>
+      <button class="secundario" onclick="location.reload()">Jogar novamente</button>
+    `;
+  } else {
+    // Mais de 3 estrelas
+    localStorage.setItem("bronzePontuacao",acertos);
+    botoes=`<button class="secundario" onclick="location.reload()">Jogar novamente</button>`;
+  }
+
+  card.innerHTML = `
+    <div class="resultado">
+      <h2>Resultado Final</h2>
+      <div class="estrelas">${estrelas}</div>
+      <p><strong>Acertos:</strong> ${acertos}</p>
+      <p><strong>Erros:</strong> ${12-acertos}</p>
+      ${botoes}
+    </div>
+  `;
+}
+
+/* AÇÕES */
+function irModulo2(){
+  window.location.href = "Modulo2.html";
+}
+
+function irInicio(){
+  window.location.href="index.html";
+}
+
+function voltarDesafios(){
+  window.location.href="desafios.html";
+}
+
+function voltarConfirmar(){
+  var confirmar = confirm("Tem certeza que quer voltar?");
+  if(confirmar){
+    window.history.back();
+  }
+}
+
+</script>
+</body>
+</html>
